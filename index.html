@@ -779,28 +779,18 @@ async function initMSAL() {
 
 async function signIn() {
   try {
-    const loginReq = { scopes: SCOPES.graph, prompt: "select_account" };
-    const resp = await msalInstance.loginPopup(loginReq);
-    currentAccount = resp.account;
-    await enterApp();
+    await msalInstance.loginRedirect({ 
+      scopes: SCOPES.graph, 
+      prompt: "select_account" 
+    });
   } catch(e) {
-    if (e.errorCode === "user_cancelled") return;
-    // Fallback to redirect if popup blocked
-    try {
-      await msalInstance.loginRedirect({ scopes: SCOPES.graph });
-    } catch(e2) {
-      showToast("Erro no login: " + (e2.message || e2), "error");
-    }
+    showToast("Erro no login: " + (e.message || e), "error");
   }
 }
 
 async function signOut() {
   try {
-    await msalInstance.logoutPopup({ account: currentAccount });
-    currentAccount = null;
-    document.getElementById('app').className = '';
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('login-screen').className = '';
+    await msalInstance.logoutRedirect({ account: currentAccount });
   } catch(e) { console.error(e); }
 }
 
